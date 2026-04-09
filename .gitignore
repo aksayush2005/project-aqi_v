@@ -1,0 +1,9 @@
+# Root node modules
+node_modules/
+.env
+
+# Backups
+frontend-old/
+
+# macOS
+.DS_Store
