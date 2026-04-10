@@ -312,7 +312,13 @@ app.get('/api', (req, res) => {
   res.json({ message: 'API is working!' });
 });
 
-// ─── Start Server ─────────────────────────────────────────────────────────────
+// Example error handling for API routes
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send({ error: 'Something went wrong!' });
+});
+
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
