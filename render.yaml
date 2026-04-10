@@ -3,7 +3,7 @@ services:
     name: aqi-backend
     runtime: node
     region: oregon
-    buildCommand: npm install --prefix Backend
+    buildCommand: "cd Backend && npm install"
     startCommand: "cd Backend && npm start"
     envVars:
       - key: MONGODB_URI
