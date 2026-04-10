@@ -307,7 +307,12 @@ app.get('/api/alerts', async (req, res) => {
   }
 });
 
+// API route
+app.get('/api', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
+
 // ─── Start Server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
