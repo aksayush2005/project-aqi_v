@@ -1,23 +1,22 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "frontend/dist/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "Backend/server.js",
-      "use": "@vercel/node"
-    }
-  ],
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "MQTT_BROKER": "@mqtt_broker",
+    "MQTT_USER": "@mqtt_user",
+    "MQTT_PASS": "@mqtt_pass",
+    "AQI_ALERT_THRESHOLD": "@aqi_alert_threshold"
+  },
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api"
+      "src": "/api(.*)",
+      "dest": "Backend/server.js"
     },
     {
-      "src": "(.*)",
-      "dest": "/frontend/dist/index.html"
+      "src": "/(.*)",
+      "dest": "frontend/dist/index.html"
     }
   ]
 }

@@ -133,6 +133,11 @@ mqttClient.on('message', async (topic, message) => {
 
 // ─── REST API Routes ──────────────────────────────────────────────────────────
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'AQI Backend is running' });
+});
+
 // GET /api/nodes — list all nodes with latest status
 app.get('/api/nodes', async (req, res) => {
   try {
@@ -312,13 +317,22 @@ app.get('/api', (req, res) => {
   res.json({ message: 'API is working!' });
 });
 
-// Example error handling for API routes
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send({ error: 'Something went wrong!' });
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error', message: err.message });
 });
+
+// Start server (for local development)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
