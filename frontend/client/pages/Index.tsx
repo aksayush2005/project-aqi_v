@@ -37,7 +37,7 @@ export default function Index() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("/api/nodes");
+        const res = await axios.get("https://project-aqi-v.onrender.com/api/nodes");
         setNodes(res.data);
       } catch (err) {
         console.error("Error fetching nodes:", err);

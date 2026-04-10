@@ -22,7 +22,7 @@ export default function Alerts() {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await axios.get("/api/alerts");
+        const res = await axios.get("https://project-aqi-v.onrender.com/api/alerts");
         // Maps backend alerts into frontend Alert[] format
         const mappedAlerts: Alert[] = res.data.map((a: any, index: number) => {
           let type: "critical" | "warning" | "info" = "info";
