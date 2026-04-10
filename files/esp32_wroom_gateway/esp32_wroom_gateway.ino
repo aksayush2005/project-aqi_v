@@ -58,8 +58,10 @@
 #define NODE_ID        "Node1"            // unique ID per board
 #define WIFI_SSID      "Wifi (Armaan)"   // your WiFi name
 #define WIFI_PASSWORD  "5544332211"   // your WiFi password
-#define MQTT_BROKER    "192.168.137.1"    // Windows laptop IP (run ipconfig)
-#define MQTT_PORT      1883
+#define MQTT_BROKER    "890820ed88b946c8be66e8e09393f8a7.s1.eu.hivemq.cloud"    // HiveMQ Cloud
+#define MQTT_PORT      8883               // MQTTS (secure)
+#define MQTT_USER      "I9JU23NF394R6HH"  // HiveMQ credentials
+#define MQTT_PASS      "I9JU23NF394R6HH"  // HiveMQ credentials
 // ═══════════════════════════════════════════════════════════
 
 // ── WROOM-32 Pin Assignments ─────────────────────────────────────────────────
@@ -99,7 +101,7 @@
 #define AQI_DISPLAY_DURATION  30000   // show AQI screen for 30s, then go back to live readings
 
 // ── Objects ───────────────────────────────────────────────────────────────────
-WiFiClient       wifiClient;
+WiFiClientSecure wifiClient;
 PubSubClient     mqttClient(wifiClient);
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
@@ -279,7 +281,7 @@ void reconnectMQTT() {
     clientId += "-";
     clientId += String((uint32_t)ESP.getEfuseMac(), HEX);  // unique per chip
 
-    if (mqttClient.connect(clientId.c_str())) {
+    if (mqttClient.connect(clientId.c_str(), MQTT_USER, MQTT_PASS)) {
       Serial.println("[MQTT] Connected!");
 
       // Subscribe to the AQI reply topic
@@ -406,6 +408,9 @@ void setup() {
   connectWiFi();
 
   // ── MQTT ──────────────────────────────────────────────────────────────────
+  // Disable certificate verification for HiveMQ Cloud (MQTTS on port 8883)
+  wifiClient.setInsecure();
+  
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setCallback(onMQTTMessage);
   mqttClient.setBufferSize(512);   // increase buffer for longer payloads
