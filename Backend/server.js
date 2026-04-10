@@ -23,28 +23,39 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error('MongoDB error:', err));
 
 // ─── MQTT ─────────────────────────────────────────────────────────────────────
-const mqttOptions = {};
-if (process.env.MQTT_USER) {
-  mqttOptions.username = process.env.MQTT_USER;
-  mqttOptions.password = process.env.MQTT_PASS;
-}
+// Only initialize MQTT if not running on Vercel (serverless environment)
+const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://localhost:1883';
+const IS_SERVERLESS = process.env.VERCEL === '1';
 
-const mqttClient = mqtt.connect(process.env.MQTT_BROKER, mqttOptions);
+let mqttClient = null;
 
-mqttClient.on('connect', () => {
-  console.log('MQTT connected to broker');
-  // Subscribe to all sensor nodes
-  mqttClient.subscribe('sensors/+/data', (err) => {
-    if (err) console.error('MQTT subscribe error:', err);
-    else     console.log('Subscribed to sensors/+/data');
+if (!IS_SERVERLESS) {
+  const mqttOptions = {
+    clientId: `aqi-backend-${Date.now()}`,
+    reconnectPeriod: 1000,
+    clean: true
+  };
+  
+  if (process.env.MQTT_USER) {
+    mqttOptions.username = process.env.MQTT_USER;
+    mqttOptions.password = process.env.MQTT_PASS;
+  }
+
+  mqttClient = mqtt.connect(MQTT_BROKER, mqttOptions);
+
+  mqttClient.on('connect', () => {
+    console.log('MQTT connected to broker');
+    mqttClient.subscribe('sensors/+/data', (err) => {
+      if (err) console.error('MQTT subscribe error:', err);
+      else     console.log('Subscribed to sensors/+/data');
+    });
   });
-});
 
-mqttClient.on('error', (err) => {
-  console.error('MQTT error:', err);
-});
+  mqttClient.on('error', (err) => {
+    console.error('MQTT error:', err);
+  });
 
-mqttClient.on('message', async (topic, message) => {
+  mqttClient.on('message', async (topic, message) => {
   // topic format: sensors/NodeX/data
   const parts  = topic.split('/');
   const nodeId = parts[1];
@@ -104,38 +115,50 @@ mqttClient.on('message', async (topic, message) => {
     console.error('DB save error:', err);
   }
 
-  // ── Publish AQI back to node for OLED display ────────────────────────────
-  // Include sub-indices so the ESP32/frontend can show breakdown if needed
-  const aqiPayload = JSON.stringify({
-    aqi,
-    category,
-    color,
-    recommendation,
-    pm25SubIndex,
-    gasSubIndex,
-    dominantPollutant,
+    // ── Publish AQI back to node for OLED display ────────────────────────────
+    const aqiPayload = JSON.stringify({
+      aqi,
+      category,
+      color,
+      recommendation,
+      pm25SubIndex,
+      gasSubIndex,
+      dominantPollutant,
+    });
+    mqttClient.publish(`sensors/${nodeId}/aqi`, aqiPayload);
+
+    console.log(
+      `[${nodeId}] PM2.5=${pm2_5}µg/m³ (sub=${pm25SubIndex}) | ` +
+      `Gas=${gas}ppm (sub=${gasSubIndex}) | ` +
+      `AQI=${aqi} (${category}) dominant=${dominantPollutant}`
+    );
   });
-  mqttClient.publish(`sensors/${nodeId}/aqi`, aqiPayload);
+} else {
+  console.log('Running in serverless environment (Vercel). MQTT listener disabled.');
+  console.log('Ensure IoT devices publish directly to your cloud MQTT broker.');
+}
 
-  console.log(
-    `[${nodeId}] PM2.5=${pm2_5}µg/m³ (sub=${pm25SubIndex}) | ` +
-    `Gas=${gas}ppm (sub=${gasSubIndex}) | ` +
-    `AQI=${aqi} (${category}) dominant=${dominantPollutant}`
-  );
-
-  // ── Alert check ─────────────────────────────────────────────────────────
+// ── Alert check function (works in both modes) ────────────────────────────────
+function checkAQIThreshold(nodeId, aqi) {
   const threshold = parseInt(process.env.AQI_ALERT_THRESHOLD) || 100;
   if (aqi > threshold) {
     console.warn(`ALERT: ${nodeId} AQI=${aqi} exceeds threshold ${threshold}`);
     // TODO: send email/SMS via nodemailer or Twilio
   }
-});
+  return aqi > threshold;
+}
 
 // ─── REST API Routes ──────────────────────────────────────────────────────────
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'AQI Backend is running' });
+  res.json({ 
+    status: 'ok', 
+    message: 'AQI Backend is running',
+    environment: IS_SERVERLESS ? 'vercel' : 'local',
+    mqtt: IS_SERVERLESS ? 'disabled (serverless)' : 'enabled',
+    broker: MQTT_BROKER
+  });
 });
 
 // GET /api/nodes — list all nodes with latest status
@@ -328,10 +351,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error', message: err.message });
 });
 
-// Start server (for local development)
-if (process.env.NODE_ENV !== 'production') {
+// Start server (for local development and serverless)
+if (!IS_SERVERLESS && process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`\n✓ AQI Backend running on port ${PORT}`);
+    console.log(`✓ Environment: Local Development`);
+    console.log(`✓ MQTT Broker: ${MQTT_BROKER}`);
   });
 }
 
