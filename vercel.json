@@ -3,11 +3,11 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "MQTT_BROKER": "@mqtt_broker",
-    "MQTT_USER": "@mqtt_user",
-    "MQTT_PASS": "@mqtt_pass",
-    "AQI_ALERT_THRESHOLD": "@aqi_alert_threshold"
+    "MONGODB_URI": "mongodb://Admin:LeLePassword@ac-jdo6e8r-shard-00-00.ckxzenq.mongodb.net:27017,ac-jdo6e8r-shard-00-01.ckxzenq.mongodb.net:27017,ac-jdo6e8r-shard-00-02.ckxzenq.mongodb.net:27017/?ssl=true&replicaSet=atlas-w0pbk3-shard-0&authSource=admin&appName=DatabaseOP",
+    "MQTT_BROKER": "mqtts://890820ed88b946c8be66e8e09393f8a7.s1.eu.hivemq.cloud:8883",
+    "MQTT_USER": "I9JU23NF394R6HH",
+    "MQTT_PASS": "I9JU23NF394R6HH",
+    "AQI_ALERT_THRESHOLD": "100"
   },
   "routes": [
     {
