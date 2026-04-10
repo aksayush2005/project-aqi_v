@@ -8,16 +8,17 @@
     "MQTT_BROKER": "mqtts://890820ed88b946c8be66e8e09393f8a7.s1.eu.hivemq.cloud:8883",
     "MQTT_USER": "I9JU23NF394R6HH",
     "MQTT_PASS": "I9JU23NF394R6HH",
-    "AQI_ALERT_THRESHOLD": "100"
+    "AQI_ALERT_THRESHOLD": "100",
+    "VERCEL": "1"
   },
-  "routes": [
-    {
-      "src": "/api(.*)",
-      "dest": "Backend/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/dist/index.html"
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 60
     }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/frontend/dist/index.html" }
   ]
 }
