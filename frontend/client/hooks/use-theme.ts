@@ -15,6 +15,11 @@ export function useTheme() {
     setTheme(initialTheme);
     applyTheme(initialTheme);
     setIsLoading(false);
+
+    // Listen for global theme updates to keep multiple hooks synced
+    const handleThemeChange = (e: any) => setTheme(e.detail);
+    window.addEventListener('theme-synced', handleThemeChange);
+    return () => window.removeEventListener('theme-synced', handleThemeChange);
   }, []);
 
   // Apply theme to document
@@ -33,6 +38,8 @@ export function useTheme() {
     const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     applyTheme(newTheme);
+    // Broadcast the new theme so other components (like Index graphs) immediately update
+    window.dispatchEvent(new CustomEvent('theme-synced', { detail: newTheme }));
   };
 
   return { theme, toggleTheme, isLoading };

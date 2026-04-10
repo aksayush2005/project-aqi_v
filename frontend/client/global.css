@@ -173,4 +173,67 @@
   .nav-link.active {
     @apply bg-primary text-primary-foreground;
   }
+
+  /* ── Time Range Selector ──────────────────────────────── */
+  .time-range-selector {
+    @apply inline-flex items-center gap-1 p-1.5 rounded-2xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-sm;
+  }
+
+  .time-range-btn {
+    @apply px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider
+           text-muted-foreground cursor-pointer
+           transition-all duration-300 ease-out select-none;
+  }
+
+  .time-range-btn:hover:not(.active) {
+    @apply bg-slate-100 dark:bg-slate-700/50 text-foreground;
+  }
+
+  .time-range-btn.active {
+    @apply bg-primary text-primary-foreground shadow-md;
+    transform: scale(1.02);
+  }
+
+  /* ── Comparison Mode ──────────────────────────────────── */
+  .compare-toggle-btn {
+    @apply flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider
+           border-2 cursor-pointer transition-all duration-300 ease-out select-none;
+  }
+
+  .compare-toggle-btn.inactive {
+    @apply bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700
+           text-muted-foreground hover:border-purple-300 dark:hover:border-purple-600 hover:text-purple-600 dark:hover:text-purple-400;
+  }
+
+  .compare-toggle-btn.active {
+    @apply bg-purple-500/10 border-purple-400 dark:border-purple-500
+           text-purple-600 dark:text-purple-400 shadow-md;
+  }
+
+  .compare-select {
+    @apply bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-purple-300 dark:border-purple-600
+           text-foreground outline-none font-medium p-2.5 rounded-xl cursor-pointer text-sm
+           transition-all duration-200 shadow-sm;
+  }
+
+  /* ── Daily Stats Pills ────────────────────────────────── */
+  .daily-stats-row {
+    @apply flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-border/50;
+  }
+
+  .stat-pill {
+    @apply flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold tracking-wide;
+  }
+
+  .stat-pill-high {
+    @apply bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400;
+  }
+
+  .stat-pill-low {
+    @apply bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400;
+  }
+
+  .stat-pill-avg {
+    @apply bg-slate-100/80 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300;
+  }
 }

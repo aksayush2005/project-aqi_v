@@ -145,4 +145,44 @@ function getRecommendation(category) {
   return recommendations[category] || 'No recommendation available.';
 }
 
+/**
+ * Calculate AQI from both PM2.5 (µg/m³) and MQ135 gas sensor (PPM).
+ * @param {number} pm25  - PM2.5 concentration in µg/m³.
+ * @param {number} mq135 - MQ135 gas sensor reading in PPM.
+ * @returns {object} AQI breakdown and dominant pollutant.
+ */
+function calculateAQI(pm25, mq135) {
+    const pm25Breakpoints = [0, 12, 35.4, 55.4, 150.4, 250.4, 500.4];
+    const mq135Breakpoints = [0, 50, 100, 150, 200, 300, 500];
+
+    const pm25Index = calculateSubIndex(pm25, pm25Breakpoints);
+    const mq135Index = calculateSubIndex(mq135, mq135Breakpoints);
+
+    const dominantPollutant = pm25Index >= mq135Index ? 'pm2_5' : 'mq135';
+    const aqi = Math.max(pm25Index, mq135Index);
+
+    return {
+        aqi,
+        dominantPollutant,
+        breakdown: {
+            pm25: pm25Index,
+            mq135: mq135Index,
+        },
+    };
+}
+
+/**
+ * Helper function to calculate sub-index for a pollutant.
+ */
+function calculateSubIndex(concentration, breakpoints) {
+    for (let i = 0; i < breakpoints.length - 1; i++) {
+        if (concentration >= breakpoints[i] && concentration <= breakpoints[i + 1]) {
+            const [low, high] = [breakpoints[i], breakpoints[i + 1]];
+            const [indexLow, indexHigh] = [i * 50, (i + 1) * 50];
+            return ((concentration - low) / (high - low)) * (indexHigh - indexLow) + indexLow;
+        }
+    }
+    return 500; // Default to max AQI if out of range.
+}
+
 module.exports = { calculateAQI, getRecommendation };

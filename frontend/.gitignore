@@ -7,21 +7,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
 *.local
+
+# Environment variables (NEVER push these)
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env*.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# TypeScript
+*.tsbuildinfo
+
+# Test / Coverage
+coverage/
+
+# Netlify
+.netlify/
+
+# Misc
 .config/
-.env

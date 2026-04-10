@@ -175,7 +175,7 @@ app.get('/api/nodes/:id/latest', async (req, res) => {
 app.get('/api/nodes/:id/data', async (req, res) => {
   try {
     const range     = req.query.range || '24h';
-    const rangeMap  = { '24h': 24, '7d': 168, '30d': 720 };
+    const rangeMap  = { '1h': 1, '24h': 24, '7d': 168, '30d': 720 };
     const hours     = rangeMap[range] || 24;
     const since     = new Date(Date.now() - hours * 3600 * 1000);
 
@@ -218,7 +218,7 @@ app.get('/api/summary', async (req, res) => {
 app.get('/api/nodes/:id/stats', async (req, res) => {
   try {
     const range    = req.query.range || '7d';
-    const rangeMap = { '24h': 24, '7d': 168, '30d': 720 };
+    const rangeMap = { '1h': 1, '24h': 24, '7d': 168, '30d': 720 };
     const hours    = rangeMap[range] || 168;
     const since    = new Date(Date.now() - hours * 3600 * 1000);
 
@@ -240,6 +240,52 @@ app.get('/api/nodes/:id/stats', async (req, res) => {
     ]);
 
     res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/nodes/:id/daily-stats — today's min, max, avg for AQI, temp, humidity
+app.get('/api/nodes/:id/daily-stats', async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const stats = await Reading.aggregate([
+      { $match: { nodeId: req.params.id, timestamp: { $gte: today } } },
+      {
+        $group: {
+          _id: null,
+          minAQI:  { $min: '$aqi' },
+          maxAQI:  { $max: '$aqi' },
+          avgAQI:  { $avg: '$aqi' },
+          minTemp: { $min: '$temperature' },
+          maxTemp: { $max: '$temperature' },
+          avgTemp: { $avg: '$temperature' },
+          minHum:  { $min: '$humidity' },
+          maxHum:  { $max: '$humidity' },
+          avgHum:  { $avg: '$humidity' },
+          count:   { $sum: 1 }
+        }
+      }
+    ]);
+
+    if (stats.length === 0) {
+      return res.json({
+        aqi:      { min: 0, max: 0, avg: 0 },
+        temp:     { min: 0, max: 0, avg: 0 },
+        humidity: { min: 0, max: 0, avg: 0 },
+        count: 0
+      });
+    }
+
+    const s = stats[0];
+    res.json({
+      aqi:      { min: Math.round(s.minAQI),  max: Math.round(s.maxAQI),  avg: Math.round(s.avgAQI) },
+      temp:     { min: +s.minTemp.toFixed(1),  max: +s.maxTemp.toFixed(1),  avg: +s.avgTemp.toFixed(1) },
+      humidity: { min: Math.round(s.minHum),   max: Math.round(s.maxHum),   avg: Math.round(s.avgHum) },
+      count: s.count
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
