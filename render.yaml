@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: aqi-backend
+    runtime: node
+    region: oregon
+    buildCommand: npm install --prefix Backend
+    startCommand: "cd Backend && npm start"
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: MQTT_BROKER
+        sync: false
+      - key: MQTT_USER
+        sync: false
+      - key: MQTT_PASS
+        sync: false
+      - key: AQI_ALERT_THRESHOLD
+        value: "100"
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
