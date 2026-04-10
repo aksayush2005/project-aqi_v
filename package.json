@@ -2,8 +2,13 @@
   "name": "project-aqi",
   "version": "1.0.0",
   "description": "Smart Air Quality Monitoring System",
+  "license": "MIT",
   "scripts": {
     "build": "cd Backend && npm install",
-    "start": "cd Backend && npm start"
+    "start": "cd Backend && npm start",
+    "dev": "cd Backend && npm run dev"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }
