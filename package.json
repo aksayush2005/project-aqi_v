@@ -1,0 +1,9 @@
+{
+  "name": "project-aqi",
+  "version": "1.0.0",
+  "description": "Smart Air Quality Monitoring System",
+  "scripts": {
+    "build": "cd Backend && npm install",
+    "start": "cd Backend && npm start"
+  }
+}
